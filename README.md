@@ -13,9 +13,9 @@ npm install
 
 Also, follow this doc to install Ganache: http://truffleframework.com/docs/ganache/using
 
-...
+```
 sudo npm install -g ganache-cli 
-...
+```
 
 # Build
 
