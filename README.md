@@ -5,12 +5,17 @@ The Token and Crowdsale smart contracts for the https://www.trendsproject.io/ IC
 # Install
 
 ```
+cd ico-crowdsale
 sudo npm install -g truffle
 sudo npm install -g ganache-cli
 npm install
 ```
 
 Also, follow this doc to install Ganache: http://truffleframework.com/docs/ganache/using
+
+...
+sudo npm install -g ganache-cli 
+...
 
 # Build
 
