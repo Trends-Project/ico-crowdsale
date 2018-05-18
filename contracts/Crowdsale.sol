@@ -362,7 +362,7 @@ contract TRND is Ownable, MintableToken, BurnableByOwner {
 	
     summPrivateSale   = 5000000 * (10 ** uint256(decimals)); 
     summAirdrop       = 4500000 * (10 ** uint256(decimals));  
-    summPremineBounty =  500000 * (10 ** uint256(decimals));  
+    summPremineBounty = 1000000 * (10 ** uint256(decimals));  
     summPartnerships  = 2500000 * (10 ** uint256(decimals));  		    
     // Founders and supporters initial Allocations
     mint(addressPrivateSale, summPrivateSale);
