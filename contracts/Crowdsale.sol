@@ -171,13 +171,121 @@ contract StandardToken is ERC20, BasicToken {
 
 }
 
+
+/**
+ * @title Pausable
+ * @dev Base contract which allows children to implement an emergency stop mechanism.
+ */
+contract Pausable is Ownable {
+  event Pause();
+  event Unpause();
+
+  bool public paused = false;
+
+
+  /**
+   * @dev Modifier to make a function callable only when the contract is not paused.
+   */
+  modifier whenNotPaused() {
+    require(!paused);
+    _;
+  }
+
+  /**
+   * @dev Modifier to make a function callable only when the contract is paused.
+   */
+  modifier whenPaused() {
+    require(paused);
+    _;
+  }
+
+  /**
+   * @dev called by the owner to pause, triggers stopped state
+   */
+  function pause() onlyOwner whenNotPaused public {
+    paused = true;
+    emit Pause();
+  }
+
+  /**
+   * @dev called by the owner to unpause, returns to normal state
+   */
+  function unpause() onlyOwner whenPaused public {
+    paused = false;
+    emit Unpause();
+  }
+}
+
+/**
+ * @title Pausable token
+ * @dev StandardToken modified with pausable transfers.
+ **/
+contract PausableToken is StandardToken, Pausable {
+
+  function transfer(
+    address _to,
+    uint256 _value
+  )
+    public
+    whenNotPaused
+    returns (bool)
+  {
+    return super.transfer(_to, _value);
+  }
+
+  function transferFrom(
+    address _from,
+    address _to,
+    uint256 _value
+  )
+    public
+    whenNotPaused
+    returns (bool)
+  {
+    return super.transferFrom(_from, _to, _value);
+  }
+
+  function approve(
+    address _spender,
+    uint256 _value
+  )
+    public
+    whenNotPaused
+    returns (bool)
+  {
+    return super.approve(_spender, _value);
+  }
+
+  function increaseApproval(
+    address _spender,
+    uint _addedValue
+  )
+    public
+    whenNotPaused
+    returns (bool success)
+  {
+    return super.increaseApproval(_spender, _addedValue);
+  }
+
+  function decreaseApproval(
+    address _spender,
+    uint _subtractedValue
+  )
+    public
+    whenNotPaused
+    returns (bool success)
+  {
+    return super.decreaseApproval(_spender, _subtractedValue);
+  }
+}
+
 /**
  * @title Mintable token
  * @dev Simple ERC20 Token example, with mintable token creation
  * @dev Issue: * https://github.com/OpenZeppelin/openzeppelin-solidity/issues/120
  * Based on code by TokenMarketNet: https://github.com/TokenMarketNet/ico/blob/master/contracts/MintableToken.sol
  */
-contract MintableToken is StandardToken {
+contract MintableToken is PausableToken {
   event Mint(address indexed to, uint256 amount);
   event MintFinished();
 
@@ -195,7 +303,7 @@ contract MintableToken is StandardToken {
    * @param _amount The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
    */
-  function mint(address _to, uint256 _amount) onlyOwner canMint public returns (bool) {
+  function mint(address _to, uint256 _amount) onlyOwner canMint whenNotPaused public returns (bool) {
     totalSupply_ = totalSupply_.add(_amount);
     balances[_to] = balances[_to].add(_amount);
     emit Mint(_to, _amount);
@@ -235,21 +343,31 @@ contract TRND is Ownable, MintableToken, BurnableByOwner {
   string public constant symbol = "TRND";
   uint32 public constant decimals = 18;
   
-  address public addressFundingEmployees;
+  address public addressPrivateSale;
+  address public addressAirdrop;
+  address public addressPremineBounty;
   address public addressPartnerships;
 
-  uint256 public summFundingEmployees;
+  uint256 public summPrivateSale;
+  uint256 public summAirdrop;
+  uint256 public summPremineBounty;
   uint256 public summPartnerships;
  // uint256 public totalSupply;
 
   function TRND() public {
-    //totalSupply = 10000000000 * (10 ** uint256(decimals));  		
-    addressFundingEmployees = 0x14723a09acff6d2a60dcdf7aa4aff308fddc160c;
-	addressPartnerships = 0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db;    
-    summFundingEmployees = 7500000 * (10 ** uint256(decimals));  
-	summPartnerships = 2500000 * (10 ** uint256(decimals));  		    
+    addressPrivateSale   = 0x6701DdeDBeb3155B8c908D0D12985A699B9d2272;
+    addressAirdrop       = 0xd176131235B5B8dC314202a8B348CC71798B0874;
+    addressPremineBounty = 0xd176131235B5B8dC314202a8B348CC71798B0874;
+    addressPartnerships  = 0x441B2B781a6b411f1988084a597e2ED4e0A7C352; 
+	
+    summPrivateSale   = 5000000 * (10 ** uint256(decimals)); 
+    summAirdrop       = 4500000 * (10 ** uint256(decimals));  
+    summPremineBounty =  500000 * (10 ** uint256(decimals));  
+    summPartnerships  = 2500000 * (10 ** uint256(decimals));  		    
     // Founders and supporters initial Allocations
-    mint(addressFundingEmployees, summFundingEmployees);
+    mint(addressPrivateSale, summPrivateSale);
+    mint(addressAirdrop, summAirdrop);
+    mint(addressPremineBounty, summPremineBounty);
     mint(addressPartnerships, summPartnerships);
   }
 }
@@ -269,7 +387,6 @@ contract Crowdsale is Ownable {
   // soft cap
   uint softcap;
   // hard cap
-  uint256 hardcapPrivateSale;
   uint256 hardcapPreICO; 
   uint256 hardcapMainSale;  
   TRND public token;
@@ -279,23 +396,19 @@ contract Crowdsale is Ownable {
   // start and end timestamps where investments are allowed (both inclusive)
   //ico
     //start
-  uint256 public startIcoPrivateSale;
   uint256 public startIcoPreICO;  
   uint256 public startIcoMainSale;  
     //end 
-  uint256 public endIcoPrivateSale;    
   uint256 public endIcoPreICO; 
   uint256 public endIcoMainSale;   
   //token distribution
  // uint256 public maxIco;
 
   uint256 public totalSoldTokens;
-  uint256 minPurchasePrivateSale;
   uint256 minPurchasePreICO;     
   uint256 minPurchaseMainSale;   
   
   // how many token units a Contributor gets per wei
-  uint256 public rateIcoPrivateSale;
   uint256 public rateIcoPreICO;
   uint256 public rateIcoMainSale;
 
@@ -318,37 +431,50 @@ contract Crowdsale is Ownable {
   function Crowdsale() public {
     token = createTokenContract();
     //soft cap in tokens
-    softcap = 20000000 * 1 ether; 
-    hardcapPrivateSale = 5000000 * 1 ether; 
-    hardcapPreICO      = 5000000 * 1 ether; 
+    softcap            = 20000000 * 1 ether; 
+    hardcapPreICO      =  5000000 * 1 ether; 
     hardcapMainSale    = 80000000 * 1 ether; 
 	
-	//min Purchase in eth
-    minPurchasePrivateSale = 100000000000000000;
-	minPurchasePreICO      = 1 * 1 ether;
-	minPurchaseMainSale    = 1 * 1 ether;
+    //min Purchase in wei = 0.1 ETH
+    minPurchasePreICO      = 100000000000000000;
+    minPurchaseMainSale    = 100000000000000000;
     // start and end timestamps where investments are allowed
     //ico
-      //start/end 
-    startIcoPrivateSale = 1526371200; // 15 May 2018 08:00:00;
-    endIcoPrivateSale   = 1529049600; //   15 Jun 2018 08:00:00;
-    startIcoPreICO = 1529049600; //   15 Jun 2018 08:00:00
-    endIcoPreICO   = 1531641600; //   15 Jul 2018 08:00:00
-    startIcoMainSale = 1531641600; //   15 Jul 2018 08:00:00
-    endIcoMainSale   = 1536998400; //   15 Sep 2018 08:00:00  
+    //start/end 
+    startIcoPreICO   = 1527843600; //   06/01/2018 @ 9:00am (UTC)
+    endIcoPreICO     = 1530435600; //   07/01/2018 @ 9:00am (UTC)
+    startIcoMainSale = 1530435600; //   07/01/2018 @ 9:00am (UTC)
+    endIcoMainSale   = 1533891600; //   08/10/2018 @ 9:00am (UTC)
 
-    // rate;
-    rateIcoPrivateSale = 3000;
-	rateIcoPreICO = 2000;
-	rateIcoMainSale = 1000;
+    //rate; 0.125$ for ETH = 700$
+    rateIcoPreICO = 5600;
+    //rate; 0.25$ for ETH = 700$
+    rateIcoMainSale = 2800;
+
     // address where funds are collected
-    wallet = 0xca35b7d915458ef540ade6068dfe2f44e8fa733c;
+    wallet = 0xca5EdAE100d4D262DC3Ec2dE96FD9943Ea659d04;
   }
   
-  function setRateIcoPrivateSale(uint _rateIcoPrivateSale) public onlyOwner  {
-    rateIcoPrivateSale = _rateIcoPrivateSale;
-  }   
-  function setRateIcoPreICO(uint _rateIcoPreICO) public onlyOwner  {
+  function setStartIcoPreICO(uint256 _startIcoPreICO) public onlyOwner  { 
+    uint256 delta;
+    require(now < startIcoPreICO);
+	if (startIcoPreICO > _startIcoPreICO) {
+	  delta = startIcoPreICO.sub(_startIcoPreICO);
+	  startIcoPreICO   = _startIcoPreICO;
+	  endIcoPreICO     = endIcoPreICO.sub(delta);
+      startIcoMainSale = startIcoMainSale.sub(delta);
+      endIcoMainSale   = endIcoMainSale.sub(delta);
+	}
+	if (startIcoPreICO < _startIcoPreICO) {
+	  delta = _startIcoPreICO.sub(startIcoPreICO);
+	  startIcoPreICO   = _startIcoPreICO;
+	  endIcoPreICO     = endIcoPreICO.add(delta);
+      startIcoMainSale = startIcoMainSale.add(delta);
+      endIcoMainSale   = endIcoMainSale.add(delta);
+	}	
+  }
+  
+  function setRateIcoPreICO(uint256 _rateIcoPreICO) public onlyOwner  {
     rateIcoPreICO = _rateIcoPreICO;
   }   
   function setRateIcoMainSale(uint _rateIcoMainSale) public onlyOwner  {
@@ -366,10 +492,6 @@ contract Crowdsale is Ownable {
   function getRateIcoWithBonus() public view returns (uint256) {
     uint256 bonus;
 	uint256 rateICO;
-    //icoPrivateSale   
-    if (now >= startIcoPrivateSale && now < endIcoPrivateSale){
-      rateICO = rateIcoPrivateSale;
-    }  
     //icoPreICO   
     if (now >= startIcoPreICO && now < endIcoPreICO){
       rateICO = rateIcoPreICO;
@@ -381,19 +503,19 @@ contract Crowdsale is Ownable {
     }  
 
     //bonus
-    if (now >= startIcoPrivateSale && now < startIcoPrivateSale.add( 2 * 7 * 1 days )){
+    if (now >= startIcoPreICO && now < startIcoPreICO.add( 2 * 7 * 1 days )){
       bonus = 10;
     }  
-    if (now >= startIcoPrivateSale.add(2 * 7 * 1 days) && now < startIcoPrivateSale.add(4 * 7 * 1 days)){
+    if (now >= startIcoPreICO.add(2 * 7 * 1 days) && now < startIcoPreICO.add(4 * 7 * 1 days)){
       bonus = 8;
     } 
-    if (now >= startIcoPrivateSale.add(4 * 7 * 1 days) && now < startIcoPrivateSale.add(6 * 7 * 1 days)){
+    if (now >= startIcoPreICO.add(4 * 7 * 1 days) && now < startIcoPreICO.add(6 * 7 * 1 days)){
       bonus = 6;
     } 
-    if (now >= startIcoPrivateSale.add(6 * 7 * 1 days) && now < startIcoPrivateSale.add(8 * 7 * 1 days)){
+    if (now >= startIcoPreICO.add(6 * 7 * 1 days) && now < startIcoPreICO.add(8 * 7 * 1 days)){
       bonus = 4;
     } 
-    if (now >= startIcoPrivateSale.add(8 * 7 * 1 days) && now < startIcoPrivateSale.add(10 * 7 * 1 days)){
+    if (now >= startIcoPreICO.add(8 * 7 * 1 days) && now < startIcoPreICO.add(10 * 7 * 1 days)){
       bonus = 2;
     } 
 
@@ -408,19 +530,8 @@ contract Crowdsale is Ownable {
     uint hardCap;
     require(beneficiary != address(0));
     rate = getRateIcoWithBonus();
-    //icoPrivateSale  
-    hardCap = hardcapPrivateSale;
-    if (now >= startIcoPrivateSale && now < endIcoPrivateSale && totalSoldTokens < hardCap){
-      require(weiAmount >= minPurchasePrivateSale);
-      tokens = weiAmount.mul(rate);
-      if (hardCap.sub(totalSoldTokens) < tokens){
-        tokens = hardCap.sub(totalSoldTokens); 
-        weiAmount = tokens.div(rate);
-        backAmount = msg.value.sub(weiAmount);
-      }
-    }  
     //icoPreICO   
-    hardCap = hardcapPreICO.add(hardcapPrivateSale);
+    hardCap = hardcapPreICO;
     if (now >= startIcoPreICO && now < endIcoPreICO && totalSoldTokens < hardCap){
 	  require(weiAmount >= minPurchasePreICO);
       tokens = weiAmount.mul(rate);
@@ -431,7 +542,7 @@ contract Crowdsale is Ownable {
       }
     }  
     //icoMainSale  
-    hardCap = hardcapMainSale.add(hardcapPreICO.add(hardcapPrivateSale));
+    hardCap = hardcapMainSale.add(hardcapPreICO);
     if (now >= startIcoMainSale  && now < endIcoMainSale  && totalSoldTokens < hardCap){
 	  require(weiAmount >= minPurchaseMainSale);
       tokens = weiAmount.mul(rate);
@@ -491,13 +602,19 @@ contract Crowdsale is Ownable {
 			unconfirmedSum = unconfirmedSum.sub(unconfirmedSumAddr[_address]);
 			unconfirmedSumAddr[_address] = 0;
           }
-          
       }
-   
    }
    
    function GetPermissionsList(address _address) public constant onlyOwner returns(uint8){
      return token.GetPermissionsList(_address); 
    }   
+   
+   function pause() onlyOwner public {
+     token.pause();
+   }
+
+   function unpause() onlyOwner public {
+     token.unpause();
+   }
     
 }
