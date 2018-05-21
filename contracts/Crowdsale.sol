@@ -345,29 +345,29 @@ contract TRND is Ownable, MintableToken, BurnableByOwner {
   
   address public addressPrivateSale;
   address public addressAirdrop;
-  address public addressPremineBounty;
+  address public addressFoundersShare;
   address public addressPartnerships;
 
   uint256 public summPrivateSale;
   uint256 public summAirdrop;
-  uint256 public summPremineBounty;
+  uint256 public summFoundersShare;
   uint256 public summPartnerships;
  // uint256 public totalSupply;
 
   function TRND() public {
     addressPrivateSale   = 0x6701DdeDBeb3155B8c908D0D12985A699B9d2272;
+    addressFoundersShare = 0x441B2B781a6b411f1988084a597e2ED4e0A7C352;
+    addressPartnerships  = 0x5317709Ffae188eF4ed3BC3434a4EC629778721f; 
     addressAirdrop       = 0xd176131235B5B8dC314202a8B348CC71798B0874;
-    addressPremineBounty = 0xd176131235B5B8dC314202a8B348CC71798B0874;
-    addressPartnerships  = 0x441B2B781a6b411f1988084a597e2ED4e0A7C352; 
 	
     summPrivateSale   = 5000000 * (10 ** uint256(decimals)); 
-    summAirdrop       = 4500000 * (10 ** uint256(decimals));  
-    summPremineBounty = 1000000 * (10 ** uint256(decimals));  
+    summFoundersShare = 5000000 * (10 ** uint256(decimals));  
     summPartnerships  = 2500000 * (10 ** uint256(decimals));  		    
+    summAirdrop       = 2500000 * (10 ** uint256(decimals));  
     // Founders and supporters initial Allocations
     mint(addressPrivateSale, summPrivateSale);
     mint(addressAirdrop, summAirdrop);
-    mint(addressPremineBounty, summPremineBounty);
+    mint(addressFoundersShare, summFoundersShare);
     mint(addressPartnerships, summPartnerships);
   }
 }
