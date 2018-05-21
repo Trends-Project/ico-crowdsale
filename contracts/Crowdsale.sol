@@ -406,7 +406,6 @@ contract Crowdsale is Ownable {
 
   uint256 public totalSoldTokens;
   uint256 minPurchasePreICO;     
-  uint256 minPurchaseMainSale;   
   
   // how many token units a Contributor gets per wei
   uint256 public rateIcoPreICO;
@@ -437,7 +436,6 @@ contract Crowdsale is Ownable {
 	
     //min Purchase in wei = 0.1 ETH
     minPurchasePreICO      = 100000000000000000;
-    minPurchaseMainSale    = 100000000000000000;
     // start and end timestamps where investments are allowed
     //ico
     //start/end 
@@ -544,7 +542,6 @@ contract Crowdsale is Ownable {
     //icoMainSale  
     hardCap = hardcapMainSale.add(hardcapPreICO);
     if (now >= startIcoMainSale  && now < endIcoMainSale  && totalSoldTokens < hardCap){
-	  require(weiAmount >= minPurchaseMainSale);
       tokens = weiAmount.mul(rate);
       if (hardCap.sub(totalSoldTokens) < tokens){
         tokens = hardCap.sub(totalSoldTokens); 
