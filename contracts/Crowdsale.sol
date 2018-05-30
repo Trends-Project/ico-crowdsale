@@ -448,8 +448,8 @@ contract Crowdsale is Ownable {
     startIcoMainSale = 1534323600; //   08/15/2018 @ 9:00am (UTC)
     endIcoMainSale   = 1540976400; //   10/31/2018 @ 9:00am (UTC)
 
-    //rate; 0.125$ for ETH = 700$
-    rateIcoPreICO = 5600;
+    //rate; 0.1875$ for ETH = 700$
+    rateIcoPreICO = 3733;
     //rate; 0.25$ for ETH = 700$
     rateIcoMainSale = 2800;
 
