@@ -441,13 +441,12 @@ contract Crowdsale is Ownable {
 	
     //min Purchase in wei = 0.1 ETH
     minPurchasePreICO      = 100000000000000000;
+    
     // start and end timestamps where investments are allowed
-    //ico
-    //start/end 
-    startIcoPreICO   = 1527843600; //   06/01/2018 @ 9:00am (UTC)
-    endIcoPreICO     = 1530435600; //   07/01/2018 @ 9:00am (UTC)
-    startIcoMainSale = 1530435600; //   07/01/2018 @ 9:00am (UTC)
-    endIcoMainSale   = 1533891600; //   08/10/2018 @ 9:00am (UTC)
+    startIcoPreICO   = 1530435600; //   07/01/2018 @ 9:00am (UTC)
+    endIcoPreICO     = 1533027600; //   07/31/2018 @ 9:00am (UTC)
+    startIcoMainSale = 1534323600; //   08/15/2018 @ 9:00am (UTC)
+    endIcoMainSale   = 1540976400; //   10/31/2018 @ 9:00am (UTC)
 
     //rate; 0.125$ for ETH = 700$
     rateIcoPreICO = 5600;
