@@ -359,7 +359,7 @@ contract TRND is Ownable, MintableToken, BurnableByOwner {
   uint256 public summPartnershipsAndExchanges;
  // uint256 public totalSupply;
 
-  constructor() public {
+  function TRND() public {
     addressPrivateSale   = 0x6701DdeDBeb3155B8c908D0D12985A699B9d2272;
     addressFoundersShare = 0x441B2B781a6b411f1988084a597e2ED4e0A7C352;
     addressPartnershipsAndExchanges  = 0x5317709Ffae188eF4ed3BC3434a4EC629778721f; 
@@ -432,7 +432,7 @@ contract Crowdsale is Ownable {
 */
   event TokenProcurement(address indexed contributor, address indexed beneficiary, uint256 value, uint256 amount);
   
-  constructor() public {
+  function Crowdsale() public {
     token = createTokenContract();
     //soft cap in tokens
     softcap            = 20000000 * 1 ether; 
