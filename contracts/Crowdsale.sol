@@ -2,6 +2,11 @@ pragma solidity ^0.4.23;
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
+// imports for testing in remix solidity ide
+//import "github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol";
+//import "github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Ownable.sol";
+
+
 /**
  * @title ERC20Basic
  * @dev Simpler version of ERC20 interface
@@ -354,7 +359,7 @@ contract TRND is Ownable, MintableToken, BurnableByOwner {
   uint256 public summPartnershipsAndExchanges;
  // uint256 public totalSupply;
 
-  function TRND() public {
+  constructor() public {
     addressPrivateSale   = 0x6701DdeDBeb3155B8c908D0D12985A699B9d2272;
     addressFoundersShare = 0x441B2B781a6b411f1988084a597e2ED4e0A7C352;
     addressPartnershipsAndExchanges  = 0x5317709Ffae188eF4ed3BC3434a4EC629778721f; 
@@ -427,7 +432,7 @@ contract Crowdsale is Ownable {
 */
   event TokenProcurement(address indexed contributor, address indexed beneficiary, uint256 value, uint256 amount);
   
-  function Crowdsale() public {
+  constructor() public {
     token = createTokenContract();
     //soft cap in tokens
     softcap            = 20000000 * 1 ether; 
@@ -454,30 +459,45 @@ contract Crowdsale is Ownable {
   }
   
   function setStartIcoPreICO(uint256 _startIcoPreICO) public onlyOwner  { 
-    uint256 delta;
+    // Enforce consistency of dates
+    require(_startIcoPreICO < endIcoPreICO);
+    // Once Pre-ICO has started, none of the dates can be moved anymore.
     require(now < startIcoPreICO);
-	if (startIcoPreICO > _startIcoPreICO) {
-	  delta = startIcoPreICO.sub(_startIcoPreICO);
-	  startIcoPreICO   = _startIcoPreICO;
-	  endIcoPreICO     = endIcoPreICO.sub(delta);
-      startIcoMainSale = startIcoMainSale.sub(delta);
-      endIcoMainSale   = endIcoMainSale.sub(delta);
-	}
-	if (startIcoPreICO < _startIcoPreICO) {
-	  delta = _startIcoPreICO.sub(startIcoPreICO);
-	  startIcoPreICO   = _startIcoPreICO;
-	  endIcoPreICO     = endIcoPreICO.add(delta);
-      startIcoMainSale = startIcoMainSale.add(delta);
-      endIcoMainSale   = endIcoMainSale.add(delta);
-	}	
+	startIcoPreICO   = _startIcoPreICO;
+  }
+
+  function setEndIcoPreICO(uint256 _endIcoPreICO) public onlyOwner  {     
+	// Enforce consistency of dates
+    require(startIcoPreICO < _endIcoPreICO && _endIcoPreICO < startIcoMainSale);
+    // Once Pre-ICO has started, none of the dates can be moved anymore.
+    require(now < startIcoPreICO);
+	endIcoPreICO   = _endIcoPreICO;
+  }
+  
+  function setStartIcoMainICO(uint256 _startIcoMainSale) public onlyOwner  { 
+    // Enforce consistency of dates
+    require(endIcoPreICO < _startIcoMainSale && _startIcoMainSale < endIcoMainSale);
+    // Once Pre-ICO has started, none of the dates can be moved anymore.    
+    require(now < startIcoPreICO);
+	startIcoMainSale   = _startIcoMainSale;
+  }
+  
+  function setEndIcoMainICO(uint256 _endIcoMainSale) public onlyOwner  { 
+    // Enforce consistency of dates
+    require(startIcoMainSale < _endIcoMainSale);
+    // Once Pre-ICO has started, none of the dates can be moved anymore.
+    require(now < startIcoPreICO);
+	endIcoMainSale   = _endIcoMainSale;
   }
   
   function setRateIcoPreICO(uint256 _rateIcoPreICO) public onlyOwner  {
     rateIcoPreICO = _rateIcoPreICO;
   }   
+  
   function setRateIcoMainSale(uint _rateIcoMainSale) public onlyOwner  {
     rateIcoMainSale = _rateIcoMainSale;
-  }     
+  }
+       
   // fallback function can be used to Procure tokens
   function () external payable {
     procureTokens(msg.sender);
