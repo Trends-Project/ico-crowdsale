@@ -462,7 +462,7 @@ contract Crowdsale is Ownable {
     require(_startIcoPreICO < endIcoPreICO);
     // Once Pre-ICO has started, none of the dates can be moved anymore.
     require(now < startIcoPreICO);
-	startIcoPreICO   = _startIcoPreICO;
+	  startIcoPreICO   = _startIcoPreICO;
   }
 
   function setEndIcoPreICO(uint256 _endIcoPreICO) public onlyOwner  {     
@@ -470,7 +470,7 @@ contract Crowdsale is Ownable {
     require(startIcoPreICO < _endIcoPreICO && _endIcoPreICO < startIcoMainSale);
     // Once Pre-ICO has started, none of the dates can be moved anymore.
     require(now < startIcoPreICO);
-	endIcoPreICO   = _endIcoPreICO;
+	  endIcoPreICO   = _endIcoPreICO;
   }
   
   function setStartIcoMainICO(uint256 _startIcoMainSale) public onlyOwner  { 
@@ -478,7 +478,7 @@ contract Crowdsale is Ownable {
     require(endIcoPreICO < _startIcoMainSale && _startIcoMainSale < endIcoMainSale);
     // Once Pre-ICO has started, none of the dates can be moved anymore.    
     require(now < startIcoPreICO);
-	startIcoMainSale   = _startIcoMainSale;
+	  startIcoMainSale   = _startIcoMainSale;
   }
   
   function setEndIcoMainICO(uint256 _endIcoMainSale) public onlyOwner  { 
@@ -486,7 +486,7 @@ contract Crowdsale is Ownable {
     require(startIcoMainSale < _endIcoMainSale);
     // Once Pre-ICO has started, none of the dates can be moved anymore.
     require(now < startIcoPreICO);
-	endIcoMainSale   = _endIcoMainSale;
+	  endIcoMainSale   = _endIcoMainSale;
   }
   
   function setRateIcoPreICO(uint256 _rateIcoPreICO) public onlyOwner  {
@@ -508,7 +508,7 @@ contract Crowdsale is Ownable {
   
   function getRateIcoWithBonus() public view returns (uint256) {
     uint256 bonus;
-	uint256 rateICO;
+	  uint256 rateICO;
     //icoPreICO   
     if (now >= startIcoPreICO && now < endIcoPreICO){
       rateICO = rateIcoPreICO;
