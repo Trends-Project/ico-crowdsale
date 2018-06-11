@@ -360,10 +360,10 @@ contract TRND is Ownable, MintableToken, BurnableByOwner {
  // uint256 public totalSupply;
 
   function TRND() public {
-    addressPrivateSale   = 0x6701DdeDBeb3155B8c908D0D12985A699B9d2272;
-    addressFoundersShare = 0x441B2B781a6b411f1988084a597e2ED4e0A7C352;
-    addressPartnershipsAndExchanges  = 0x5317709Ffae188eF4ed3BC3434a4EC629778721f; 
-    addressAirdrop       = 0xd176131235B5B8dC314202a8B348CC71798B0874;
+    addressPrivateSale   = 0xAfB042EE51FE904F67935222744628e1Ce3F6584;
+    addressFoundersShare = 0x6E3F6b1cB72B4C315d0Ae719aACbE8436638b134;
+    addressPartnershipsAndExchanges  = 0xedc57Ed34370139E9f8144C7cf3D0374fa1f0eCf; 
+    addressAirdrop       = 0xA1f99816B7DD6913bF8BDe68d71A1a3a6A47513B;
 	
     summPrivateSale   = 5000000 * (10 ** uint256(decimals)); 
     summFoundersShare = 5000000 * (10 ** uint256(decimals));  
@@ -538,6 +538,9 @@ contract Crowdsale is Ownable {
 
     return rateICO + rateICO.mul(bonus).div(100);
   }    
+
+
+  
   // low level token Pledge function
   function procureTokens(address beneficiary) public payable {
     uint256 tokens;
@@ -572,9 +575,9 @@ contract Crowdsale is Ownable {
     totalSoldTokens = totalSoldTokens.add(tokens);
     balances[msg.sender] = balances[msg.sender].add(weiAmount);
     token.mint(msg.sender, tokens);
-	unconfirmedSum = unconfirmedSum.add(tokens);
-	unconfirmedSumAddr[msg.sender] = unconfirmedSumAddr[msg.sender].add(tokens);
-	token.SetPermissionsList(beneficiary, 1);
+	  unconfirmedSum = unconfirmedSum.add(tokens);
+	  unconfirmedSumAddr[msg.sender] = unconfirmedSumAddr[msg.sender].add(tokens);
+	  token.SetPermissionsList(beneficiary, 1);
     if (backAmount > 0){
       msg.sender.transfer(backAmount);    
     }
@@ -615,8 +618,8 @@ contract Crowdsale is Ownable {
       token.SetPermissionsList(_address, _sign);
       if (_sign == 0){
           if (sign != _sign){  
-			unconfirmedSum = unconfirmedSum.sub(unconfirmedSumAddr[_address]);
-			unconfirmedSumAddr[_address] = 0;
+			      unconfirmedSum = unconfirmedSum.sub(unconfirmedSumAddr[_address]);
+			      unconfirmedSumAddr[_address] = 0;
           }
       }
    }
