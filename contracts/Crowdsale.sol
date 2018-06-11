@@ -402,6 +402,7 @@ contract Crowdsale is Ownable {
   //ico
     //start
   uint256 public startIcoPreICO;  
+  uint256 public startIcoPreICO2ndRound;  
   uint256 public startIcoMainSale;  
     //end 
   uint256 public endIcoPreICO; 
@@ -443,15 +444,16 @@ contract Crowdsale is Ownable {
     minPurchasePreICO      = 100000000000000000;
     
     // start and end timestamps where investments are allowed
-    startIcoPreICO   = 1530435600; //   07/01/2018 @ 9:00am (UTC)
-    endIcoPreICO     = 1533027600; //   07/31/2018 @ 9:00am (UTC)
-    startIcoMainSale = 1534323600; //   08/15/2018 @ 9:00am (UTC)
-    endIcoMainSale   = 1540976400; //   10/31/2018 @ 9:00am (UTC)
+    startIcoPreICO   = 1530435600;        // 07/01/2018 @ 9:00am (UTC)
+    startIcoPreICO2ndRound = 1531731600;  // 07/16/2018 @ 9:00am (UTC)
+    endIcoPreICO     = 1533027600;        // 07/31/2018 @ 9:00am (UTC)
+    startIcoMainSale = 1534323600;        // 08/15/2018 @ 9:00am (UTC)
+    endIcoMainSale   = 1538557200;        // 10/03/2018 @ 9:00am (UTC)
 
-    //rate; 0.1875$ for ETH = 700$
-    rateIcoPreICO = 3733;
-    //rate; 0.25$ for ETH = 700$
-    rateIcoMainSale = 2800;
+    //rate; 0.1875$ for ETH = 550$
+    rateIcoPreICO = 2933;
+    //rate; 0.25$ for ETH = 550$
+    rateIcoMainSale = 2200;
 
     // address where funds are collected
     wallet = 0xca5EdAE100d4D262DC3Ec2dE96FD9943Ea659d04;
@@ -463,6 +465,14 @@ contract Crowdsale is Ownable {
     // Once Pre-ICO has started, none of the dates can be moved anymore.
     require(now < startIcoPreICO);
 	  startIcoPreICO   = _startIcoPreICO;
+  }
+
+  function setStartIcoPreICO2ndRound(uint256 _startIcoPreICO2ndRound) public onlyOwner  { 
+    // Enforce consistency of dates
+    require(_startIcoPreICO2ndRound > startIcoPreICO && _startIcoPreICO2ndRound < endIcoPreICO);
+    // Once Pre-ICO has started, none of the dates can be moved anymore.
+    require(now < startIcoPreICO);
+	  startIcoPreICO2ndRound   = _startIcoPreICO2ndRound;
   }
 
   function setEndIcoPreICO(uint256 _endIcoPreICO) public onlyOwner  {     
@@ -519,24 +529,23 @@ contract Crowdsale is Ownable {
       rateICO = rateIcoMainSale;
     }  
 
-    //bonus
-    if (now >= startIcoPreICO && now < startIcoPreICO.add( 2 * 7 * 1 days )){
-      bonus = 10;
-    }  
-    if (now >= startIcoPreICO.add(2 * 7 * 1 days) && now < startIcoPreICO.add(4 * 7 * 1 days)){
-      bonus = 8;
-    } 
-    if (now >= startIcoPreICO.add(4 * 7 * 1 days) && now < startIcoPreICO.add(6 * 7 * 1 days)){
-      bonus = 6;
-    } 
-    if (now >= startIcoPreICO.add(6 * 7 * 1 days) && now < startIcoPreICO.add(8 * 7 * 1 days)){
-      bonus = 4;
-    } 
-    if (now >= startIcoPreICO.add(8 * 7 * 1 days) && now < startIcoPreICO.add(10 * 7 * 1 days)){
-      bonus = 2;
-    } 
+    // bonus
+    // Note: Multiplying percentages with 10, later dividing by 1000 instead of 100
+    // This deals with our 0.2% daily decrease. 
+    if (now >= startIcoPreICO && now < startIcoPreICO2ndRound){
+      bonus = 300; // 30% * 10
+    } else if (now >= startIcoPreICO2ndRound && now < startIcoPreICO){
+      bonus = 200; // 20% * 10
+    } else if (now >= startIcoMainSale) {
+      // note: 86400 seconds in a day, decrease by 0.2% daily
+      uint256 daysSinceMainIcoStarted = (now - startIcoMainSale) / 86400;
+      bonus = 100 - (2 * daysSinceMainIcoStarted); // 10% - 0.2 per day * 10
+      if (bonus < 0) { // safety - all the dates can be changed
+        bonus = 0;
+      }
+    }
 
-    return rateICO + rateICO.mul(bonus).div(100);
+    return rateICO + rateICO.mul(bonus).div(1000);
   }    
 
 
