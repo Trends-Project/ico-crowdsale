@@ -594,7 +594,7 @@ contract Crowdsale is Ownable {
     // This deals with our 0.2% daily decrease. 
     if (_date >= startIcoPreICO && _date < startIcoPreICO2ndRound){
       bonus = 300; // 30% * 10
-    } else if (_date >= startIcoPreICO2ndRound && _date < startIcoPreICO){
+    } else if (_date >= startIcoPreICO2ndRound && _date < endIcoPreICO){
       bonus = 200; // 20% * 10
     } else if (_date >= startIcoMainSale) {
       // note: 86400 seconds in a day, decrease by 0.2% daily
