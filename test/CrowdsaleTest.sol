@@ -84,9 +84,8 @@ contract CrowdsaleTest {
     }
 
     function _doAssert(string message, uint256 date, uint256 rate) {        
-        //Crowdsale crowdsale = new Crowdsale();
         Crowdsale crowdsale = Crowdsale(DeployedAddresses.Crowdsale());
-
         Assert.equal(crowdsale.getRateIcoWithBonusByDate(date), rate, message);
     }
+    
 }
