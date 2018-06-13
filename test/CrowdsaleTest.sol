@@ -21,19 +21,15 @@ contract CrowdsaleTest {
     function testGetICORate() public {
         Crowdsale crowdsale = new Crowdsale();
 
-        // uint256 preIcoBonusRound1 = 300
-        // uint256 preIcoBonusRound2 = 200
-        // uint256 mainIcoBonus = 100
-        // uint256 mainIcoBonusDeltaPerDay = 2
-
         // Values from Excel sheet
-uint256 preIcoRateBonus1 = 3812;
-uint256 preIcoRateBonus2 = 3519;
-uint256 mainIcoDay1 = 2420;
-uint256 mainIcoDay2 = 2415;
-uint256 mainIcoDay7 = 2393;
-uint256 mainIcoDay39 = 2252;
-uint256 mainIcoLastDay = 2200;
+        uint256 preIcoRateBonus1 = 3812;
+        uint256 preIcoRateBonus2 = 3519;
+        uint256 mainIcoDay1 = 2420;
+        uint256 mainIcoDay2 = 2415;
+        uint256 mainIcoDay7 = 2393;
+        uint256 mainIcoDay39 = 2252;
+        uint256 mainIcoDay49 = 2208;
+        uint256 mainIcoLastDay = 2208; 
 
         uint256 date;
         _doAssert("rate is wong on date", date, 0);
@@ -45,13 +41,13 @@ uint256 mainIcoLastDay = 2200;
 
         date = 1531731600;              // July 16 9:00 am GMT - pre ico 2nd round
         _doAssert("rate is wong on pre ico 1", date-1, preIcoRateBonus1);
-        _doAssert("rate is wong on 2", date, preIcoRateBonus2);
-        _doAssert("rate is wong on 2", date+1, preIcoRateBonus2);
+        _doAssert("rate is wong on pre ico round 2 start", date, preIcoRateBonus2);
+        _doAssert("rate is wong on pre ico round 2 start", date+1, preIcoRateBonus2);
 
         date = 1533027600;              // 07/31/2018 @ 9:00am (UTC) // pre ico end
-        _doAssert("rate is wong on main day 2", date-1, preIcoRateBonus2);
-        _doAssert("rate is wong on main day 2", date, preIcoRateBonus2);
-        _doAssert("rate is wong after end of pre ico", date+1, 0);
+        _doAssert("rate is wong on pre ico round 2 before end", date-1, preIcoRateBonus2);
+        _doAssert("rate is wong on pre ico round 2 end", date, 0);
+        _doAssert("rate is wong after end of pre ico round 2", date+1, 0);
 
 
         date = 1534323600;              // 08/15/2018 @ 9:00am (UTC) // main ico start
@@ -67,18 +63,20 @@ uint256 mainIcoLastDay = 2200;
         _doAssert("rate is wong on main 2", date, mainIcoDay2);
         _doAssert("rate is wong on main 2", date+1, mainIcoDay2);
 
-        date = icoDay1 + 7 * day;         // main ico day 7
-        //_doAssert("rate is wong on date", day2-1, mainIcoDay1);
+        date = icoDay1 + 6 * day;         // main ico day 7
         _doAssert("rate is wong on main 7", date, mainIcoDay7);
         _doAssert("rate is wong on main 7", date+1, mainIcoDay7);
 
-        date = icoDay1 + 39 * day;        // main ico day 39
-        //_doAssert("rate is wong on date", day2-1, mainIcoDay1);
+        date = icoDay1 + 38 * day;        // main ico day 39
         _doAssert("rate is wong on main 39", date, mainIcoDay39);
         _doAssert("rate is wong on main 39", date+1, mainIcoDay39);
 
+        date = icoDay1 + 48 * day;        // main ico day 49
+        _doAssert("rate is wong on main 39", date, mainIcoDay49);
+        _doAssert("rate is wong on main 39", date+1, mainIcoDay49);
+
         date = 1538557200 - day;          // 10/03/2018 @ 9:00am (UTC) main ico last day
-       _doAssert("rate is wong on last", date, mainIcoLastDay);
+        _doAssert("rate is wong on last", date, mainIcoLastDay);
         _doAssert("rate is wong on last", date+1, mainIcoLastDay);
         _doAssert("rate is wong on last", date+day-1, mainIcoLastDay);
         _doAssert("rate is wong past last", date+day, 0);
