@@ -1,17 +1,72 @@
 pragma solidity ^0.4.23;
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
-// imports for testing in remix solidity ide
-//import "github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol";
-//import "github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Ownable.sol";
+// From OpenZeppelin
+contract Ownable {
+  address public owner;
 
 
-/**
- * @title ERC20Basic
- * @dev Simpler version of ERC20 interface
- * @dev see https://github.com/ethereum/EIPs/issues/179
- */
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+
+  /**
+   * @dev The Ownable constructor sets the original `owner` of the contract to the sender
+   * account.
+   */
+  function Ownable() public {
+    owner = msg.sender;
+  }
+
+  /**
+   * @dev Throws if called by any account other than the owner.
+   */
+  modifier onlyOwner() {
+    require(msg.sender == owner);
+    _;
+  }
+
+  /**
+   * @dev Allows the current owner to transfer control of the contract to a newOwner.
+   * @param newOwner The address to transfer ownership to.
+   */
+  function transferOwnership(address newOwner) public onlyOwner {
+    require(newOwner != address(0));
+    emit OwnershipTransferred(owner, newOwner);
+    owner = newOwner;
+  }
+
+}
+
+// from Open-Zeppelin
+library SafeMath {
+
+  function mul(uint256 a, uint256 b) internal pure returns (uint256 c) {
+    if (a == 0) {
+      return 0;
+    }
+    c = a * b;
+    assert(c / a == b);
+    return c;
+  }
+
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    // assert(b > 0); // Solidity automatically throws when dividing by 0
+    // uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+    return a / b;
+  }
+
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    assert(b <= a);
+    return a - b;
+  }
+
+  function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
+    c = a + b;
+    assert(c >= a);
+    return c;
+  }
+}
+
 contract ERC20Basic {
   function totalSupply() public view returns (uint256);
   function balanceOf(address who) public view returns (uint256);
@@ -517,28 +572,33 @@ contract Crowdsale is Ownable {
   }
   
   function getRateIcoWithBonus() public view returns (uint256) {
+    return getRateIcoWithBonusByDate(now);
+  }    
+
+  // testable method
+  function getRateIcoWithBonusByDate(uint256 _date) public view returns (uint256) {
     uint256 bonus;
 	  uint256 rateICO;
     //icoPreICO   
-    if (now >= startIcoPreICO && now < endIcoPreICO){
+    if (_date >= startIcoPreICO && _date < endIcoPreICO){
       rateICO = rateIcoPreICO;
     }  
 
     //icoMainSale   
-    if (now >= startIcoMainSale  && now < endIcoMainSale){
+    if (_date >= startIcoMainSale  && _date < endIcoMainSale){
       rateICO = rateIcoMainSale;
     }  
 
     // bonus
     // Note: Multiplying percentages with 10, later dividing by 1000 instead of 100
     // This deals with our 0.2% daily decrease. 
-    if (now >= startIcoPreICO && now < startIcoPreICO2ndRound){
+    if (_date >= startIcoPreICO && _date < startIcoPreICO2ndRound){
       bonus = 300; // 30% * 10
-    } else if (now >= startIcoPreICO2ndRound && now < startIcoPreICO){
+    } else if (_date >= startIcoPreICO2ndRound && _date < startIcoPreICO){
       bonus = 200; // 20% * 10
-    } else if (now >= startIcoMainSale) {
+    } else if (_date >= startIcoMainSale) {
       // note: 86400 seconds in a day, decrease by 0.2% daily
-      uint256 daysSinceMainIcoStarted = (now - startIcoMainSale) / 86400;
+      uint256 daysSinceMainIcoStarted = (_date - startIcoMainSale) / 86400;
       bonus = 100 - (2 * daysSinceMainIcoStarted); // 10% - 0.2 per day * 10
       if (bonus < 0) { // safety - all the dates can be changed
         bonus = 0;
