@@ -19,7 +19,6 @@ contract CrowdsaleTest {
     }
 
     function testGetICORate() public {
-        Crowdsale crowdsale = new Crowdsale();
 
         // Values from Excel sheet
         uint256 preIcoRateBonus1 = 3812;
@@ -83,9 +82,9 @@ contract CrowdsaleTest {
 
     }
 
-    function _doAssert(string message, uint256 date, uint256 rate) {        
+    function _doAssert(string message, uint256 date, uint256 rate) public {        
         Crowdsale crowdsale = Crowdsale(DeployedAddresses.Crowdsale());
         Assert.equal(crowdsale.getRateIcoWithBonusByDate(date), rate, message);
     }
-    
+
 }

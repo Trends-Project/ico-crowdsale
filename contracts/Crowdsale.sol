@@ -609,7 +609,8 @@ contract Crowdsale is Ownable {
   }    
 
 
-  
+  event ProcureTokenUnderway(address to, uint256 value);
+
   // low level token Pledge function
   function procureTokens(address beneficiary) public payable {
     uint256 tokens;
@@ -618,6 +619,9 @@ contract Crowdsale is Ownable {
     uint256 rate;
     uint hardCap;
     require(beneficiary != address(0));
+
+    emit ProcureTokenUnderway(beneficiary, 77);
+
     rate = getRateIcoWithBonus();
     //icoPreICO   
     hardCap = hardcapPreICO;
@@ -640,7 +644,14 @@ contract Crowdsale is Ownable {
         backAmount = msg.value.sub(weiAmount);
       }
     }     
+    
+    emit ProcureTokenUnderway(beneficiary, tokens);
+
+    
     require(tokens > 0);
+
+
+
     totalSoldTokens = totalSoldTokens.add(tokens);
     balances[msg.sender] = balances[msg.sender].add(weiAmount);
     token.mint(msg.sender, tokens);
