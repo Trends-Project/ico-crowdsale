@@ -2,6 +2,9 @@ import latestTime from "../node_modules/openzeppelin-solidity/test/helpers/lates
 import { increaseTimeTo } from "../node_modules/openzeppelin-solidity/test/helpers/increaseTime.js";
 import { advanceBlock } from '../node_modules/openzeppelin-solidity/test/helpers/advanceToBlock';
 
+var Web3 = require('web3');
+var web3 = new Web3();
+
 // test/FundingTest.js
 const Crowdsale = artifacts.require("Crowdsale");
 const FINNEY = 10**15; // 1 Finney is 10^15 Wei
@@ -12,10 +15,25 @@ contract("Crowdsale", accounts => {
   const firstAccount = accounts[0];
   const secondAccount = accounts[1];
 
-  before(async function () {
+
+  before(async function () {      
     // Advance to the next block to correctly read time in the solidity "now" function interpreted by ganache
     await advanceBlock();
   });
+
+  // doesn't work
+//   it('should test current block time', async function(){
+//     var ganache = require("ganache-cli");
+//     var provider = ganache.provider({time: new Date('2018-04-15')});
+//     var blockNumber = web3.eth.blockNumber;
+//     var blockHash = web3.eth.getBlock(blockNumber).hash;
+//     var timestamp = web3.eth.getBlock(blockNumber).timestamp;
+
+//     console.log('time', new Date(timestamp).timestamp);
+//     web3.setProvider(provider)
+//     //console.log('time', new Date(await web3.eth.getBlock('latest').timestamp));
+//   });
+
 
   it("sets an owner", async function () {
     var crowdsale = await Crowdsale.deployed();
@@ -115,6 +133,52 @@ contract("Crowdsale", accounts => {
     await crowdsale.setRateIcoMainSale(defaultRate);
   });
 
+
+
+  it("allows for a pre-ICO sale", async () => {
+    var crowdsale = await Crowdsale.deployed();
+    const day = 60 * 60 * 24;
+    //await crowdsale.setStartIcoPreICO(new Date().getTime() / 1000 + 1);
+
+    // set time to 
+    // 
+
+    var snapShotNumber = snapshot();
+
+    let now = latestTime();
+    printDate("initial time: ",now);
+
+    await increaseTimeTo(1530435600 + 10); // July 1st
+
+    now = latestTime();
+    printDate("new time: ",now);
+
+    try {
+        await crowdsale.procureTokens(firstAccount, { from: firstAccount, value: 50 * FINNEY, gas: 500000 });
+        await crowdsale.procureTokens(secondAccount, { from: secondAccount, value: 150 * FINNEY, gas: 500000 });
+        await crowdsale.procureTokens(secondAccount, { from: secondAccount, value: 30 * FINNEY, gas: 500000 });
+        crowdsale.equal(await sale.balances.call(firstAccount), 50 * FINNEY);
+        crowdsale.equal(await sale.balances.call(secondAccount), 180 * FINNEY);
+    } catch(error) {
+        console.log("error: ", error);
+        console.log("reverting evm");
+        revert(snapShotNumber);
+    }
+    
+
+    // setTimeout(async function () {
+        
+        
+
+    // }, 1100);
+
+
+    // just set the start of the pre-ico to now
+
+
+
+  });
+
   it("keeps track of donator balances", async () => {
     //var crowdsale = await Crowdsale.deployed();
     const day = 60 * 60 * 24;
@@ -132,4 +196,29 @@ contract("Crowdsale", accounts => {
     //assert.equal(await sale.balances.call(secondAccount), 17 * FINNEY);// fail test
   });
 
+
+
+});
+
+function printDate(message, date) {
+    console.log(message, new Date(date*1000).toUTCString());
+};
+web3._extend({
+    property: 'evm',
+    methods: [new web3._extend.Method({
+        name: 'snapshot',
+        call: 'evm_snapshot',
+        params: 0,
+        outputFormatter: toIntVal
+    })]
+});
+
+web3._extend({
+    property: 'evm',
+    methods: [new web3._extend.Method({
+        name: 'revert',
+        call: 'evm_revert',
+        params: 1,
+        inputFormatter: [toIntVal]
+    })]
 });
