@@ -454,19 +454,17 @@ contract Crowdsale is Ownable {
   mapping(address => uint) public balances;
 
   // start and end timestamps where investments are allowed (both inclusive)
-  //ico
-    //start
+  // start
   uint256 public startIcoPreICO;  
   uint256 public startIcoPreICO2ndRound;  
   uint256 public startIcoMainSale;  
-    //end 
+  // end 
   uint256 public endIcoPreICO; 
   uint256 public endIcoMainSale;   
-  //token distribution
- // uint256 public maxIco;
 
+  //token distribution
   uint256 public totalSoldTokens;
-  uint256 minPurchasePreICO;     
+  uint256 public minPurchasePreICO;     
   
   // how many token units a Contributor gets per wei
   uint256 public rateIcoPreICO;
@@ -475,6 +473,7 @@ contract Crowdsale is Ownable {
   //Unconfirmed sum
   uint256 public unconfirmedSum;
   mapping(address => uint) public unconfirmedSumAddr;
+
   // address where funds are collected
   address public wallet;
   
@@ -513,7 +512,18 @@ contract Crowdsale is Ownable {
     // address where funds are collected
     wallet = 0xca5EdAE100d4D262DC3Ec2dE96FD9943Ea659d04;
   }
-  
+
+
+// for testing
+  function contractBalanceOf(address _owner) public view returns (uint256) {
+    return balances[_owner];
+  }
+
+// for testing
+  function tokenBalanceOf(address _owner) public view returns (uint256) {
+    return token.balanceOf(_owner);
+  }
+
   function setStartIcoPreICO(uint256 _startIcoPreICO) public onlyOwner  { 
     // Enforce consistency of dates
     require(_startIcoPreICO < endIcoPreICO);
@@ -620,7 +630,7 @@ contract Crowdsale is Ownable {
     //icoPreICO   
     hardCap = hardcapPreICO;
     if (now >= startIcoPreICO && now < endIcoPreICO && totalSoldTokens < hardCap){
-	  require(weiAmount >= minPurchasePreICO);
+	    require(weiAmount >= minPurchasePreICO);
       tokens = weiAmount.mul(rate);
       if (hardCap.sub(totalSoldTokens) < tokens){
         tokens = hardCap.sub(totalSoldTokens); 

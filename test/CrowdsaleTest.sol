@@ -18,6 +18,12 @@ contract CrowdsaleTest {
         Assert.equal(sale.owner(), msg.sender, "An owner is different than a deployer");
     }
 
+
+    function testBuyTokens() public {
+        
+    }
+
+
     function testGetICORate() public {
 
         // Values from Excel sheet
