@@ -26,26 +26,13 @@ contract("Crowdsale", accounts => {
   
   const firstAccount = accounts[0];
   const secondAccount = accounts[1];
-  
-  var _sale;
-
+  const account3 = accounts[2];
+  const account4 = accounts[3];
+    
   before(async function () {      
     // Advance to the next block to correctly read time in the solidity "now" function interpreted by ganache
     await advanceBlock();
   });
-  
-  // doesn't work
-  //   it('should test current block time', async function(){
-  //     var ganache = require("ganache-cli");
-  //     var provider = ganache.provider({time: new Date('2018-04-15')});
-  //     var blockNumber = web3.eth.blockNumber;
-  //     var blockHash = web3.eth.getBlock(blockNumber).hash;
-  //     var timestamp = web3.eth.getBlock(blockNumber).timestamp;
-  
-  //     console.log('time', new Date(timestamp).timestamp);
-  //     web3.setProvider(provider)
-  //     //console.log('time', new Date(await web3.eth.getBlock('latest').timestamp));
-  //   });
   
   
   it("sets an owner", async function () {
@@ -56,11 +43,7 @@ contract("Crowdsale", accounts => {
   it("sets start date for Pre-ICO", async () => {
     var crowdsale = await Crowdsale.deployed();
     const date = 1530522000; // July 2, 2018, 09:00 GMT
-    const defaultDate = 1530435600; // July 1
-    
-    
-    const minPurchase = await crowdsale.minPurchasePreICO.call();
-    
+    const defaultDate = 1530435600; // July 1    
     assert.equal(await crowdsale.startIcoPreICO.call(), defaultDate);
     // set the date to a new date
     await crowdsale.setStartIcoPreICO(date);
@@ -151,23 +134,21 @@ contract("Crowdsale", accounts => {
   });
   
   
-  
   it("allows for a pre-ICO sale", async () => {
     var crowdsale = await Crowdsale.deployed();
     const day = 60 * 60 * 24;
     
     let now = latestTime();
-    printDate("initial time: ",now);
     
+    printDate("initial time: ",now);
     console.log("initial balance 1: ", web3.fromWei(web3.eth.getBalance(web3.eth.accounts[0])));       
     console.log("initial balance 2: ", web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1])));       
     console.log("initial balance 3: ", web3.fromWei(web3.eth.getBalance(web3.eth.accounts[2])));       
     
-    
     await increaseTimeTo(1530435600 + 10); // July 1st
     
     now = latestTime();
-    printDate("new time: ",now);
+    printDate("new time : ",now);
     
     const minPurchase = await crowdsale.minPurchasePreICO.call();
     
@@ -189,48 +170,99 @@ contract("Crowdsale", accounts => {
     
     await crowdsale.procureTokens(firstAccount, { from: firstAccount, value: amount1, gas: 500000 });
     await crowdsale.procureTokens(secondAccount, { from: secondAccount, value: amount2, gas: 500000 });
-    await crowdsale.procureTokens(secondAccount, { from: secondAccount, value: amount3, gas: 500000 });
-    //await call(myContract.methods.myMethod(put your args here if needed));
+    await crowdsale.procureTokens(secondAccount, { from: secondAccount, value: amount3, gas: 500000 });    
+    
+    const rate = await crowdsale.getRateIcoWithBonusByDate.call(now);
+    
+    console.log("rate: ", rate);
     
     var contractBalance1 = await crowdsale.contractBalanceOf.call(firstAccount);
     var tokeBalance1 = await crowdsale.tokenBalanceOf.call(firstAccount);
-
-
+    
+    var contractBalance2 = await crowdsale.contractBalanceOf.call(secondAccount);
+    var tokeBalance2 = await crowdsale.tokenBalanceOf.call(secondAccount);
+    
     console.log("contract balance: ", contractBalance1);
     console.log("token balance: ", tokeBalance1);
-
-    // assert.equal(contractBalance1, 100);
-    // assert.equal(tokeBalance1, 500);
-
     
+    console.log("contract balance 2: ", contractBalance2);
+    console.log("token balance 2: ", tokeBalance2);
     
-    //const balanceA = await crowdsale.balanceOf(firstAccount);
-    //crowdsale.equal(balanceA, amount1);
+    var amountTotal = amount2 + amount3;
     
-    //crowdsale.equal(await crowdsale.balanceOf(secondAccount), amount2 + amount3);
-    
-    
+    assert.equal(contractBalance2, amountTotal);
+    assert.equal(tokeBalance2, amountTotal * rate);
     
   });
   
   
-  it("keeps track of donator balances", async () => {
-    //var crowdsale = await Crowdsale.deployed();
-    const day = 60 * 60 * 24;
+  it("allows for main ICO sale", async () => {
+    var crowdsale = await Crowdsale.deployed();
     
-    //await increaseTimeTo(1530435600); // July 1st
+    let now = latestTime();
     
-    //console.log("block time "+latestTime());
-    //console.log("block time "+new Date(latestTime()*1000));
+    printDate("main initial time: ",now);
+    console.log("initial balance 1: ", web3.fromWei(web3.eth.getBalance(web3.eth.accounts[2])));       
+    console.log("initial balance 2: ", web3.fromWei(web3.eth.getBalance(web3.eth.accounts[3])));       
+    console.log("initial balance 3: ", web3.fromWei(web3.eth.getBalance(web3.eth.accounts[4])));       
     
-    //await sale(firstAccount, { from: firstAccount, value: 5 * FINNEY, gas: 500000 });
-    // await sale.procureTokens(secondAccount, { from: secondAccount, value: 15 * FINNEY, gas: 500000 });
-    // await sale.procureTokens(secondAccount, { from: secondAccount, value: 3 * FINNEY, gas: 500000 });
-    // assert.equal(await sale.balances.call(firstAccount), 5 * FINNEY);
-    // assert.equal(await sale.balances.call(secondAccount), 18 * FINNEY);
-    //assert.equal(await sale.balances.call(secondAccount), 17 * FINNEY);// fail test
+    await increaseTimeTo(1534323600 - 10); // Aug 15th, 10 seconds early
+    
+    var minPurchase = ETHER / 100; // there is no min purchase on main sale
+    
+    now = await latestTime();
+    printDate("new time: ",now);
+    
+    try {
+      await crowdsale.procureTokens(account3, { from: account3, value: amount, gas: 500000 });
+      fail("purchasing tokens early should fail");
+    } catch(error) {
+      console.log("expected error - test is passing.");       
+    }
+    
+    await increaseTime(20);
+    await advanceBlock();
+
+    now = await latestTime();
+
+    printDate("main ico new time: ",now);
+    var amount1 = 3 * minPurchase;
+    var amount2 = 10 * minPurchase;
+    var amount3 = 13 * minPurchase;
+    
+    await crowdsale.procureTokens(account3, { from: account3, value: amount1, gas: 500000 });
+    await crowdsale.procureTokens(account4, { from: account4, value: amount2, gas: 500000 });
+    await crowdsale.procureTokens(account4, { from: account4, value: amount3, gas: 500000 });    
+    
+    const rate = await crowdsale.getRateIcoWithBonusByDate.call(now);
+    
+    console.log("rate: ", rate);
+    
+    var contractBalance1 = await crowdsale.contractBalanceOf.call(account3);
+    var tokeBalance1 = await crowdsale.tokenBalanceOf.call(account3);
+    
+    var contractBalance2 = await crowdsale.contractBalanceOf.call(account4);
+    var tokeBalance2 = await crowdsale.tokenBalanceOf.call(account4);
+    
+    console.log("contract balance: ", contractBalance1);
+    console.log("token balance: ", tokeBalance1);
+    
+    console.log("contract balance 2: ", contractBalance2);
+    console.log("token balance 2: ", tokeBalance2);
+    
+    var amountTotal = amount2 + amount3;
+    
+    assert.equal(contractBalance2, amountTotal);
+    assert.equal(tokeBalance2, amountTotal * rate);
+    
   });
+
   
+  
+});
+contract("Crowdsale", accounts => {
+
+
 });
 
 function printDate(message, date) {
