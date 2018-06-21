@@ -137,7 +137,23 @@ contract('Crowdsale', accounts => {
         
         
     });
-    
+
+    it('during main sale, all funds are protected by soft cap, all funds will be restored if softcap is not hit', async function () {
+
+    });
+
+    it('during private sale, funds can be withdrawn', async function () {
+        
+    });
+
+    it('during pre-ico sale, funds can be withdrawn', async function () {
+        
+    });
+    it('after main sale, funds can be withdrawn if softcap was hit', async function () {
+        
+    });
+        // 
+
     //   describe('accepting payments', function () {
     //     it('should reject payments before start', async function () {
     //       await this.crowdsale.send(value).should.be.rejectedWith(EVMRevert);

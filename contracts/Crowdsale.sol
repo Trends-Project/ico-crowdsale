@@ -671,7 +671,8 @@ contract Crowdsale is Ownable {
   
   function transferEthToMultisig() public onlyOwner {
     address _this = this;
-    require(totalSoldTokens.sub(unconfirmedSum) >= softcap && now > endIcoMainSale);  
+    // during main sale, all funds are protected by soft cap, all funds will be restored if softcap is not hit
+    require(now < startIcoMainSale || (totalSoldTokens.sub(unconfirmedSum) >= softcap && now > endIcoMainSale));  
     wallet.transfer(_this.balance);
   } 
   
