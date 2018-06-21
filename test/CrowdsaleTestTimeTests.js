@@ -17,13 +17,7 @@ const TRND = artifacts.require('TRND');
 const FINNEY = 10**15; // 1 Finney is 10^15 Wei
 
 contract('Crowdsale', accounts => {
-    
-    const rate = new BigNumber(1);
-    const value = ether(42);
-    
-    
-    
-    
+
     before(async function () {
         // Advance to the next block to correctly read time in the solidity "now" function interpreted by ganache
         await advanceBlock();
