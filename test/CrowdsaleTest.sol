@@ -4,6 +4,16 @@ import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "../contracts/Crowdsale.sol";
 
+
+// More test cases to do
+// - Buy token while paused
+// make sure it can't be transfered while paused
+// make sure it can be transfered when unpaused
+// do a ful time test
+// try to purchase before pre ico, at pre ico, after pre ico, pre ico round 2, after pre ico
+// before main ico, during main ico every day down to the last, after main ico
+
+
 contract CrowdsaleTest {
 
     uint public initialBalance = 10 ether;
@@ -19,10 +29,21 @@ contract CrowdsaleTest {
     }
 
 
-    function testBuyTokens() public {
-        
-    }
+    // function testBuyTokens() public {
+    //     Crowdsale sale = Crowdsale(DeployedAddresses.Crowdsale());
 
+    //     uint256 nowTime = sale.now();
+
+    //     sale.setStartIcoPreICO(nowTime+1);
+
+    //     wait(1000);
+
+    //     //sale.procureTokens(accounts[0], { from: accounts[0], value: 1, gas: 500000 } );
+
+
+    // }
+
+    
 
     function testGetICORate() public {
 

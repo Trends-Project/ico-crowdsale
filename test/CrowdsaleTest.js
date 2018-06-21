@@ -13,10 +13,6 @@ import {
 } from 'truffle-test-helpers';
 import { fail } from 'assert';
 
-// var Web3 = require('web3');
-// var web3 = new Web3();
-
-// test/FundingTest.js
 const Crowdsale = artifacts.require("Crowdsale");
 const ETHER = 10**18; // 1 Ether is 10^18 Wei
 const FINNEY = 10**15; // 1 Finney is 10^15 Wei
@@ -178,18 +174,16 @@ contract("Crowdsale", accounts => {
     
     var contractBalance1 = await crowdsale.contractBalanceOf.call(firstAccount);
     var tokeBalance1 = await crowdsale.tokenBalanceOf.call(firstAccount);
-    
-    var contractBalance2 = await crowdsale.contractBalanceOf.call(secondAccount);
-    var tokeBalance2 = await crowdsale.tokenBalanceOf.call(secondAccount);
-    
     console.log("contract balance: ", contractBalance1);
     console.log("token balance: ", tokeBalance1);
-    
+    assert.equal(contractBalance1, amount1);
+    assert.equal(tokeBalance1, amount1 * rate);
+
+    var contractBalance2 = await crowdsale.contractBalanceOf.call(secondAccount);
+    var tokeBalance2 = await crowdsale.tokenBalanceOf.call(secondAccount);
     console.log("contract balance 2: ", contractBalance2);
     console.log("token balance 2: ", tokeBalance2);
-    
     var amountTotal = amount2 + amount3;
-    
     assert.equal(contractBalance2, amountTotal);
     assert.equal(tokeBalance2, amountTotal * rate);
     
@@ -227,8 +221,8 @@ contract("Crowdsale", accounts => {
 
     printDate("main ico new time: ",now);
     var amount1 = 3 * minPurchase;
-    var amount2 = 10 * minPurchase;
-    var amount3 = 13 * minPurchase;
+    var amount2 = 5 * minPurchase;
+    var amount3 = 7 * minPurchase;
     
     await crowdsale.procureTokens(account3, { from: account3, value: amount1, gas: 500000 });
     await crowdsale.procureTokens(account4, { from: account4, value: amount2, gas: 500000 });
