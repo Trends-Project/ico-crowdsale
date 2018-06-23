@@ -702,9 +702,9 @@ contract Crowdsale is Ownable {
     wallet.transfer(_this.balance);
   } 
   
-  // Can be called after main token sale has ended
   function refundUnconfirmed() public{
-    require(now > endIcoMainSale);
+    // you can claim a refund 24h after main sale ended
+    require(now > endIcoMainSale + 24*60*60);
     require(balances[msg.sender] > 0);
     require(token.GetPermissionsList(msg.sender) == 1);
     uint value = balances[msg.sender];
