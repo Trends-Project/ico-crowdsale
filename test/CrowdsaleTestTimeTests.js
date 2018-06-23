@@ -269,40 +269,9 @@ contract('Crowdsale', accounts => {
         await this.crowdsale.transferEthToMultisig().should.be.fulfilled;
         
     });
-    
-    it('during pre-ico sale, funds can be withdrawn', async function () {
-        
-    });
-    
-    it('after main sale, funds can be withdrawn if softcap was hit', async function () {
-        
-    });
-    // 
-    
-    //   describe('accepting payments', function () {
-    //     it('should reject payments before start', async function () {
-    //       await this.crowdsale.send(value).should.be.rejectedWith(EVMRevert);
-    //       await this.crowdsale.buyTokens(investor, { from: purchaser, value: value }).should.be.rejectedWith(EVMRevert);
-    //     });
-    
-    //     it('should accept payments after start', async function () {
-    //       await increaseTimeTo(this.openingTime);
-    //       await this.crowdsale.send(value).should.be.fulfilled;
-    //       await this.crowdsale.buyTokens(investor, { value: value, from: purchaser }).should.be.fulfilled;
-    //     });
-    
-    //     it('should reject payments after end', async function () {
-    //       await increaseTimeTo(this.afterClosingTime);
-    //       await this.crowdsale.send(value).should.be.rejectedWith(EVMRevert);
-    //       await this.crowdsale.buyTokens(investor, { value: value, from: purchaser }).should.be.rejectedWith(EVMRevert);
-    //     });
-    //   });
+    // think about unlocking
 });
 
-function unixDate(dateString) {
-    let date = (new Date(dateString)).getTime();
-    return date / 1000;
-};
 function printDate(message, date) {
     console.log(message, new Date(date*1000).toUTCString());
 };
