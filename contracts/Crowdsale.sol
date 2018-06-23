@@ -445,7 +445,7 @@ contract TRND is Ownable, MintableToken, BurnableByOwner {
 contract Crowdsale is Ownable {
   using SafeMath for uint256;
   // soft cap
-  uint256 public softcap;
+  uint256 softcap;
   // hard cap
   uint256 hardcapPreICO; 
   uint256 hardcapMainSale;  
