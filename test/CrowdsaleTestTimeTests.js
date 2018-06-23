@@ -15,6 +15,7 @@ const Crowdsale = artifacts.require('Crowdsale');
 const TRND = artifacts.require('TRND');
 
 const FINNEY = 10**15; // 1 Finney is 10^15 Wei
+const ETHER = 10**18; // 1 Ether is 10^18 Wei
 
 contract('Crowdsale', accounts => {
 
@@ -26,28 +27,26 @@ contract('Crowdsale', accounts => {
     });
     
     beforeEach(async function () {
-        this.openingTime = latestTime() + duration.weeks(1);
-        this.closingTime = this.openingTime + duration.weeks(1);
-        this.afterClosingTime = this.closingTime + duration.seconds(1);
-        this.crowdsale = await Crowdsale.deployed();
-        const date = latestTime();
-        await this.crowdsale.setStartIcoPreICO(date);
-        var aNewDate = await this.crowdsale.startIcoPreICO.call();
         
-        console.log("new date", aNewDate);
-        
-        
+        this.crowdsale = await Crowdsale.new();
         this.token = TRND.at(await this.crowdsale.token.call());
-        
-        //console.log("token:", this.token);
-        
+                
     });
     
 
     
     it('buying tokens and pausing them', async function () {
+        //this.crowdsale = await Crowdsale.deployed();
+        //this.token = TRND.at(await this.crowdsale.token.call());
+
+        const date = latestTime();
+        await this.crowdsale.setStartIcoPreICO(date);
+        var aNewDate = await this.crowdsale.startIcoPreICO.call();
+        console.log("new date", aNewDate);
+
         console.log("empty test");
         console.log("initial balance 1: ", web3.fromWei(web3.eth.getBalance(web3.eth.accounts[0])));       
+
         var crowdsale = this.crowdsale;
         var amount1 = 400 * FINNEY; // 0.4 eth
         
@@ -140,6 +139,68 @@ contract('Crowdsale', accounts => {
 
     it('during main sale, all funds are protected by soft cap, all funds will be restored if softcap is not hit', async function () {
 
+        const date = latestTime();
+        const day = 24 * 3600;
+
+        printDate("start pre ico", await this.crowdsale.startIcoPreICO.call());
+
+        await this.crowdsale.setIcoDates(
+            date - 5*day, // pre ico
+            date - 4*day, // 2nd round
+            date - 3*day, // end of pre ico
+            date - day,   // main ico
+            date + day,   // end of main
+        );
+
+        var account = accounts[1];
+        await this.crowdsale.procureTokens(account, { from: account, value: 11*ETHER, gas: 500000 });
+
+        var contractBalance1 = await this.crowdsale.contractBalanceOf.call(account);
+        var tokeBalance1 = await this.crowdsale.tokenBalanceOf.call(account);
+        console.log("contract balance: ", contractBalance1);
+        console.log("token balance: ", tokeBalance1);
+        var totalSoldTokens = await this.crowdsale.totalSoldTokens.call();
+        var softCap =  await this.crowdsale.softcap.call();
+        console.log("total sold: ", totalSoldTokens);
+        console.log("softcap: ", softCap);
+
+        totalSoldTokens.should.be.bignumber.lessThan(softCap);
+
+        // try to withdraw, should not be allowed
+        await this.crowdsale.transferEthToMultisig().should.be.rejectedWith(EVMRevert);
+        
+        await this.crowdsale.procureTokens(account, { from: account, value: 10000*ETHER, gas: 500000 });
+
+        totalSoldTokens = await this.crowdsale.totalSoldTokens.call();
+        console.log("total sold 2: ", totalSoldTokens);
+
+        totalSoldTokens.should.be.bignumber.greaterThan(softCap);
+
+        // failing because of unconfirmed sum
+        await this.crowdsale.transferEthToMultisig().should.be.rejectedWith(EVMRevert);
+
+        // enable token transfers from acount 1
+        // TODO seems like we have to call this on every single token holder
+        // TODO I guess this is KYC - we can approve each token holder 
+        // Once they pass KYC
+        await this.crowdsale.SetPermissionsList(account, 0);
+
+        // fail because its not end of ico yet
+        await this.crowdsale.transferEthToMultisig().should.be.rejectedWith(EVMRevert);
+
+        // end ico
+        await this.crowdsale.setIcoDates(
+            date - 5*day, // pre ico
+            date - 4*day, // 2nd round
+            date - 3*day, // end of pre ico
+            date - 2*day,   // main ico
+            date - day,   // end of main
+        );
+
+        // now it should succeed
+        await this.crowdsale.transferEthToMultisig();
+
+
     });
 
     it('during private sale, funds can be withdrawn', async function () {
@@ -149,6 +210,7 @@ contract('Crowdsale', accounts => {
     it('during pre-ico sale, funds can be withdrawn', async function () {
         
     });
+
     it('after main sale, funds can be withdrawn if softcap was hit', async function () {
         
     });
@@ -173,3 +235,11 @@ contract('Crowdsale', accounts => {
     //     });
     //   });
 });
+
+function unixDate(dateString) {
+    let date = (new Date(dateString)).getTime();
+    return date / 1000;
+  };
+function printDate(message, date) {
+    console.log(message, new Date(date*1000).toUTCString());
+  };

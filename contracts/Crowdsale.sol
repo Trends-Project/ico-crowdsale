@@ -445,7 +445,7 @@ contract TRND is Ownable, MintableToken, BurnableByOwner {
 contract Crowdsale is Ownable {
   using SafeMath for uint256;
   // soft cap
-  uint softcap;
+  uint256 public softcap;
   // hard cap
   uint256 hardcapPreICO; 
   uint256 hardcapMainSale;  
@@ -477,6 +477,7 @@ contract Crowdsale is Ownable {
   // address where funds are collected
   address public wallet;
   
+  bool isTesting;
   
 /**
 * event for token Procurement logging
@@ -488,6 +489,7 @@ contract Crowdsale is Ownable {
   event TokenProcurement(address indexed contributor, address indexed beneficiary, uint256 value, uint256 amount);
   
   function Crowdsale() public {
+    //isTesting = _isTesting;
     token = createTokenContract();
     //soft cap in tokens
     softcap            = 20000000 * 1 ether; 
@@ -528,7 +530,7 @@ contract Crowdsale is Ownable {
     // Enforce consistency of dates
     require(_startIcoPreICO < endIcoPreICO);
     // Once Pre-ICO has started, none of the dates can be moved anymore.
-    require(now < startIcoPreICO);
+    require(now < startIcoPreICO); // removed so this can be tested
 	  startIcoPreICO   = _startIcoPreICO;
   }
 
@@ -564,6 +566,30 @@ contract Crowdsale is Ownable {
 	  endIcoMainSale   = _endIcoMainSale;
   }
   
+  // set all the dates
+  function setIcoDates(
+                  uint256 _startIcoPreICO,
+                  uint256 _startIcoPreICO2ndRound,
+                  uint256 _endIcoPreICO,
+                  uint256 _startIcoMainSale,
+                  uint256 _endIcoMainSale
+    ) public onlyOwner  { 
+    // Enforce consistency of dates
+    require(_startIcoPreICO < _startIcoPreICO2ndRound);
+    require(_startIcoPreICO2ndRound < _endIcoPreICO);
+    require(_endIcoPreICO <= _startIcoMainSale);
+    require(_startIcoMainSale < _endIcoMainSale);
+    // Once Pre-ICO has started, none of the dates can be moved anymore.
+    if (!isTesting) {
+      //require(now < startIcoPreICO); 
+    }
+
+	  startIcoPreICO   = _startIcoPreICO;
+	  startIcoPreICO2ndRound = _startIcoPreICO2ndRound;
+    endIcoPreICO = _endIcoPreICO;
+    startIcoMainSale = _startIcoMainSale;
+	  endIcoMainSale = _endIcoMainSale;
+  }
   function setRateIcoPreICO(uint256 _rateIcoPreICO) public onlyOwner  {
     rateIcoPreICO = _rateIcoPreICO;
   }   
