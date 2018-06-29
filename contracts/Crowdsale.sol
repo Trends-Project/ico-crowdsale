@@ -580,9 +580,7 @@ contract Crowdsale is Ownable {
     require(_endIcoPreICO <= _startIcoMainSale);
     require(_startIcoMainSale < _endIcoMainSale);
     // Once Pre-ICO has started, none of the dates can be moved anymore.
-    if (!isTesting) {
-      //require(now < startIcoPreICO); 
-    }
+    require(now < startIcoPreICO); 
 
 	  startIcoPreICO   = _startIcoPreICO;
 	  startIcoPreICO2ndRound = _startIcoPreICO2ndRound;
